@@ -1,4 +1,4 @@
-# Almost all code copied from:
+# All(?) code copied from:
 # https://github.com/ufal/udpipe/blob/master/bindings/python/examples/udpipe_model.py
 
 import os
@@ -50,28 +50,3 @@ class Model:
             output += output_format.writeSentence(sentence)
         output += output_format.finishDocument()
         return output
-
-
-def create_tagged_files(training_file, directory_name):
-    file_list = []
-    model = Model(training_file)
-    for dirpath, dirnames, filenames in os.walk(directory_name):
-        for filename in filenames:
-            if filename.endswith("txt"):
-                file_list.append(os.path.join(dirpath, filename))
-        for f in file_list:
-            with open(f, "r") as fin:
-                forum_text = fin.read()
-                sentences = model.tokenize(forum_text)
-                for s in sentences:
-                    model.tag(s)
-                conllu = model.write(sentences, "conllu")
-
-                print(conllu)
-                go_on = input("continue?")
-
-                outfile_name = f[9:18] + ".conllu"
-                with open(os.path.join(dirpath, outfile_name), "w") as fout:
-                    fout.write(conllu)
-                fout.close()
-            fin.close()
