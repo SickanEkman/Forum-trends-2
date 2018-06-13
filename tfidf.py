@@ -5,27 +5,14 @@ import math
 class Tfidf:
     def __init__(self, prepared_forum):
         self.forum = prepared_forum
-        self.corpus_dict = self.parse_corpus_data_weeks()
-        #self.corpus_detailed_dict = self.parse_corpus_data_posts()
+        self.corpus_dict = self.parse_corpus_data()
         self.list_of_words = self.parse_doc_data()
         self.tf = {}
         self.idf_posts_as_doc = {}
         self.idf_weeks_as_doc = {}
         self.sorted_tfidf = []
 
-    """def parse_corpus_data_posts(self):
-        self.corpus_detailed_dict = collections.defaultdict(list)
-        for week, list_w_texts in self.forum.corpus_data.items():
-            for text in list_w_texts:
-                set_words = set()
-                text_as_list = text.split(" ")
-                for word in text_as_list:
-                    set_words.add(word)
-                self.corpus_detailed_dict[week].append(set_words)
-        return self.corpus_detailed_dict
-    """
-
-    def parse_corpus_data_weeks(self):
+    def parse_corpus_data(self):
         self.corpus_dict = {}
         for week, list_w_posts in self.forum.corpus_data.items():
             set_words = set()
@@ -51,20 +38,7 @@ class Tfidf:
         max_occurencies = max(counted.values())
         self.tf = {k: (v / max_occurencies) for (k, v) in counted.items()}
 
-    """def count_idf_posts_as_doc(self):
-        num_docs = 1
-        for word, frequency in self.tf.items():
-            doc_occurences = 1  # to avoid zero division error
-            for week, set_list in self.corpus_detailed_dict.items():
-                for text_set in set_list:
-                    if word in text_set:
-                        doc_occurences += 1
-                    num_docs += 1
-            self.idf_posts_as_doc[word] = math.log2(num_docs/doc_occurences)
-        return self.idf_posts_as_doc
-    """
-
-    def count_idf_weeks_as_doc(self):
+    def count_idf(self):
         num_docs = len(self.corpus_dict) + 1
         for word, frequency in self.tf.items():
             doc_occurences = 1
