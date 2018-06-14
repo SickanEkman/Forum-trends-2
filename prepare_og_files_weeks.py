@@ -7,6 +7,7 @@ import csv
 import conllu
 import sys
 from collections import Counter
+import re
 
 
 class PrepareOriginalFiles:
@@ -17,7 +18,7 @@ class PrepareOriginalFiles:
 
     def prepare_file(self, forum):
         """
-        Call functions that extract different information from original file
+        Call the methods to extract different information from original file and save info to csv files
         :param forum: path (string) to specific forum file in json format
         :return: calls function that store information to csv files
         """
@@ -30,7 +31,8 @@ class PrepareOriginalFiles:
 
     def identify_language(self, forum):
         """
-        Identify language from forum file name
+        Identify language from forum file name and pick right udpipe-model
+        (Check if char -7 to -5 is "sv" or "en")
         :param forum: path (string) to specific forum file in json format
         :return: path to correct UDPipe language model
         """
@@ -69,11 +71,15 @@ class PrepareOriginalFiles:
     def extract_text(self, text_field, part_to_extract):
         """
         Make text more readable
+        (Remove words not including letters/numbers/underscore, new line char and all double white spaces)
         :param text_field: dialog or comment from the forum
         :param part_to_extract: may be either "title" or "content_text"
         :return: same text, without new lines and double spaces
         """
         og_text = text_field[part_to_extract]
+        og_text_list = og_text.split(" ")
+        og_text_list = [i for i in og_text_list if re.match(r'^\w+\W*$', i)]
+        og_text = " ".join(og_text_list)
         text_no_new_line = og_text.replace("\n", " ")
         the_text = text_no_new_line.replace("  ", " ")
         return the_text
@@ -81,6 +87,7 @@ class PrepareOriginalFiles:
     def extract_date(self, text_field):
         """
         Create date format with years and weeks
+        (Change "yyyy-mm-dd hh:mm:ss" to "yyyy-ww")
         :param text_field: string "yyyy-mm-dd hh:mm:ss"
         :return: string "yyyy-ww" where ww == week number (with leading 0)
         """
@@ -96,7 +103,7 @@ class PrepareOriginalFiles:
 
     def add_lemmas(self, list_w_data_entries, udpipe_model):
         """
-        Send text chunks to function for lemmatization and compile all info to list with tuples
+        Send text chunks to method for lemmatization and compile all info to list with tuples
         :param list_w_data_entries: nested list. Sub lists = [week, type, title text, and posted text]
         :param udpipe_model: path to UDPipe language model
         :return: list w tuples, (week, type, og title text, lemmatized title text, og posting, lemmatized posting)
@@ -174,6 +181,12 @@ class Stopwords:
                 self.save_to_file(frequencies, forum_nick)
 
     def collect_words(self, filename):
+        """
+        Look through all "text_lemmatized" in csv file and save tokens to big list
+        IMPORTANT! Not looking through "title_lemmatized"
+        :param filename: string with subdir and filename, ex: "csv_files/l.csv"
+        :return: list with all tokens in forum appearing in either OP or comments
+        """
         list_of_words = []
         with open(filename, "r") as fin:
             data = csv.DictReader(fin, delimiter="\t")
@@ -185,6 +198,11 @@ class Stopwords:
         return list_of_words
 
     def count_frequencies(self, list_w_words):
+        """
+        Count every type in list with words, save to new list sorted by frequency, falling order
+        :param list_w_words: list with all tokens
+        :return: list with types, sorted by frequency in falling order
+        """
         counted = Counter(list_w_words)
         frequency_list = sorted(
             counted,
@@ -194,6 +212,12 @@ class Stopwords:
         return frequency_list
 
     def save_to_file(self, frequencies, forum_nick):
+        """
+        If a stopword file doesn't already exist, save all types in forum to a file, sorted by frequency
+        :param frequencies: list with types, sorted by frequency in falling order
+        :param forum_nick: name of forum, ex "k" or "t"
+        :return: write file w all types in forum. Path ex: "stopword_files/k_stopwords.txt"
+        """
         subdir_stopword_files = "stopword_files"
         stopword_file_name = forum_nick + "_stopwords.txt"
         full_path_to_file = os.path.join(subdir_stopword_files, stopword_file_name)
@@ -208,9 +232,9 @@ class Stopwords:
 
 def check_if_file_exist_already(full_path_to_file):
     """
-    Check if file already exist. If it does, gives you option to over write it.
+    Check if file already exist. If it does, gives you option to overwrite it.
     :param full_path_to_file: path to csv file in subdirectory
-    :return: message leading to either saving to file or not
+    :return: string telling you to either save to file or not
     """
     if not os.path.isfile(full_path_to_file):
         return "Go ahead and create the files!"
