@@ -3,6 +3,7 @@ import csv
 import collections
 import sys
 
+
 class Preparation:
     def __init__(self, forum_nick, week_of_interest, number_of_stopwords=100, title_or_post="both"):
         """
@@ -15,12 +16,12 @@ class Preparation:
         self.path_to_csv_file = os.path.join("csv_files", self.forum_file_name)  # string
         self.stopword_file = forum_nick + "_stopwords.txt"  # string
         self.path_to_stopword_file = os.path.join("stopword_files", self.stopword_file)  # string
-
         self.week = week_of_interest  # string
         self.content_type = title_or_post  # string. Just "title", just "post", or "both"
-        self.stopwords = self.create_stopwords(number_of_stopwords)  # set
 
+        self.stopwords = self.create_stopwords(number_of_stopwords)  # set
         self.week_data = []
+        self.number_tokens_in_week = 0
         self.corpus_data = collections.defaultdict(list)
         self.collect_data()
 
@@ -70,9 +71,12 @@ class Preparation:
                     else:
                         self.corpus_data[row["week"]].append(row[header])
             if len(self.week_data) == 0:
-                print("No posts with the specified list in file\nProgram closed")
+                print("No posts for the specified week in file '%s'\nProgram closed" % self.path_to_csv_file)
                 sys.exit()
             fin.close()
+            for item in self.week_data:
+                self.number_tokens_in_week += len(item.split(" "))
+            print(self.number_tokens_in_week)
             return self.week_data, self.corpus_data
         except FileNotFoundError:
-            print("Can't find file '%s'" % (self.path_to_csv_file))
+            print("Can't find file '%s'" % self.path_to_csv_file)

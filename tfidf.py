@@ -38,16 +38,14 @@ class Tfidf:
                 self.list_of_week_words.append(word)
         return self.list_of_week_words
 
-    def count_tf(self, list_with_words=None, tf_equation="maximum occurencies"):
+    def count_tf(self, tf_equation="maximum occurencies"):
         """
         Count Term Frequency for types in doc (Week Of Interest)
         TF equation: (frequency of type)/(maximum frequency of any type)
-        :param list_with_words: list w all tokens in doc, defaults to None in which case self.list_of_week_words is used
         :param tf_equation: word count divided either with "maximum occurencies" (default) or "number tokens in doc"
         :return: adds to self.tf where k=type and v=TF
         """
-        if not list_with_words:  # so I may use same method with other data other times
-            list_with_words = self.list_of_week_words
+        list_with_words = self.list_of_week_words
         counted = collections.Counter(list_with_words)
         max_occurencies = max(counted.values())
         number_tokens = sum(counted.values())
@@ -62,8 +60,9 @@ class Tfidf:
         IDF equation: log2(number of documents in my corpus/number doc in corpus containing the word)
         :return: adds to self.idf where k=type and v=IDF
         """
-        num_docs = len(self.corpus_dict) + 1  # + 1 because I start my doc_occurences with 1 insted of 0 and if I
-                # divide a doc_occurences with a bigger value the log of the quotient would be negative. Not good!
+        num_docs = len(self.corpus_dict) + 1
+        # + 1 because I start my doc_occurences with 1 insted of 0 and if I
+        # divide a doc_occurences with a bigger value the log of the quotient would be negative. Not good?
         for word, frequency in self.tf.items():
             doc_occurences = 1  # to avoid division by zero issues
             for week, word_set in self.corpus_dict.items():
@@ -72,18 +71,18 @@ class Tfidf:
             self.idf[word] = math.log2(num_docs/doc_occurences)
         return self.idf
 
-    def count_tfidf(self):
+    def count_tfidf(self, tf_equation):
         """
         Multiply every type's tf with it's idf and get tf*idf. Create tuples (type, tfidf-value).
         :return: append tuples to self.sorted_tfidf, sorted after size of tfidf-value in falling order.
         """
         if len(self.tf) == 0:
-            self.count_tf()
+            self.count_tf(tf_equation)
         if len(self.idf) == 0:
             self.count_idf()
         tfidf = {}
         for word, value in self.tf.items():
             tfidf[word] = value * self.idf[word]
+        # Get k-v-tuples from dictionary, sort by tuple[1] in falling order. Save in order to list with tuples:
         self.sorted_tfidf = sorted(tfidf.items(), key=lambda t: t[1], reverse=True)
-        print("Sorted TFIDF", self.sorted_tfidf)
         return self.sorted_tfidf

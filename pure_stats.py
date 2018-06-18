@@ -3,8 +3,10 @@ from collections import defaultdict
 import statistics
 import math
 
+
 class PureStatistics(object):
-    def __init__(self, prepared_forum):
+    def __init__(self, prepared_forum, threshold_for_tokens=2):
+        self.rare_threshold = threshold_for_tokens
         self.forum = prepared_forum
         self.doc_frequency_dict = {}
         self.corpus_mean = {}
@@ -13,20 +15,13 @@ class PureStatistics(object):
         self.corpus_sd_mean = {}
         self.corpus_sd_median = {}
 
-    #def __init__(self, document, list_with_files):
-        self.doc_frequency_dict = {}
-        self.corpus_mean = {}
-        self.corpus_median = {}
-        self.corpus_sd = {}
-        self.corpus_sd_mean = {}
-        self.corpus_sd_median = {}
-
+    '''def __init__(self, document, list_with_files):
         self.corpus_frequency_dict = self.get_doc_word_frequencies(document, rare_threshold=2)
         self.get_corpus_word_frequencies(self.corpus_frequency_dict, list_with_files,)
         self.get_corpus_stats(self.corpus_frequency_dict)
-        self.compare_doc_and_corpus()
+        self.compare_doc_and_corpus()'''
 
-    def get_doc_word_frequencies(self, document, rare_threshold=0):
+    def get_doc_word_frequencies(self, document):
         """
         Gets frequency ((occurences/number words)*1000) of all words in doc and saves to self.doc_frequency_dict
         :param document: name/path to conllu file
@@ -35,6 +30,7 @@ class PureStatistics(object):
         """
         word_count = 0
         frequency_d = defaultdict(int)
+
         with open(document, "r") as fin:
             data = fin.read()
             for sentence in parse(data):
@@ -42,12 +38,13 @@ class PureStatistics(object):
                     word_count += 1
                     if word["upostag"] != "PUNCT":
                         lemma = word["lemma"].lower()
+
                         frequency_d[lemma] += 1
         fin.close()
         for k, v in frequency_d.items():
-            if v >= rare_threshold:
+            if v >= self.rare_threshold:
+                # Multiply with 1000 to avoid small numbers:
                 self.doc_frequency_dict[k] = (v / word_count) * 1000
-#                self.doc_frequency_dict[k] = math.log10(v / word_count)
             else:
                 pass
                 #self.doc_frequency_dict[k] = 0
@@ -80,7 +77,7 @@ class PureStatistics(object):
                     words_in_corpus[k] = words_in_corpus[k] + [0]
             #print(words_in_corpus)
 
-    def get_corpus_stats(self, corpus_occurences, ):
+    def get_corpus_stats(self, corpus_occurences):
         """
         get mean, median and (population)standard deviation for all words
         :param corpus_occurences: dict with k:word, v:[(frequency in doc x), (frequency in doc y), ...]
@@ -96,7 +93,7 @@ class PureStatistics(object):
         print(self.corpus_sd_mean)
         print(self.corpus_sd_median)
         print(self.corpus_median)
-        # todo: use sd and median even though sd for median doesnt work!
+        # todo: use sd and median even though sd for median doesn't work!
 
 
     def compare_doc_and_corpus(self, median=True):
