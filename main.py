@@ -13,13 +13,18 @@ def prepare_files():
     prepare_og_files_weeks.Stopwords()
 
 
-def prepare_forum(forum, week, number_of_stopwords, title_or_post):
+def prepare_forum(forum, week, number_of_stopwords, title_or_post, token_or_type):
     """
     Create an object containing all info needed for different KE methods stored in attributes
     :param forum: The forum nick, ex: "k" or "l"
     :param week: The Week Of Interest, ex "2015-14"
     :param number_of_stopwords: defaults to 100
     :param title_or_post: defaults to "both". Can also be "title" or "post"
+        If title, only lemmatized titles is stored in week_data & corpus_data (once for each post/comment in thread)
+        If post, only lemmatizes posts/comments are stored in week_data & corpus_data
+    :param token_or_type: defaults to "token".
+        If token, every occurence of a lemma is counted.
+        If type, each lemma is counted only once per post/comment/title.
     :return: An object with attributes:
         self.forum_file_name, ex "k.csv"
         self.path_to_csv_file, ex "csv_files/k.csv"
@@ -32,7 +37,11 @@ def prepare_forum(forum, week, number_of_stopwords, title_or_post):
         self.corpus_data, dictionary with week as key, and list with posts and/or headings as value
     """
     print("Creating a Forum Object")
-    return prepare_extraction.Preparation(forum, week, number_of_stopwords, title_or_post)
+    return prepare_extraction.Preparation(forum,
+                                          week,
+                                          number_of_stopwords,
+                                          title_or_post,
+                                          token_or_type,)
 
 
 def do_tfidf_max_occurences(my_forum):
@@ -70,13 +79,18 @@ def do_stats(my_forum, rare_threshold):
 # either this:
 #prepare_files()
 #tfidf_posts_as_doc("t", "2015-14", number_of_stopwords=200, content="both")
-my_forum = prepare_forum("l", "2015-14", number_of_stopwords=10, title_or_post="both")
+print("*** Every token in title/post/comment is counted:")
+my_forum = prepare_forum("l", "2015-52", number_of_stopwords=10, title_or_post="both", token_or_type="token")
 do_tfidf_max_occurences(my_forum)
 do_tfidf_tokens_in_doc(my_forum)
-do_stats(my_forum, rare_threshold=2)
-#tfidf_two_step("l", "2015-14", number_of_stopwords=200, content="both")
+print("\n*** Every type only counted once per title/post/comment:")
+my_forum = prepare_forum("l", "2015-52", number_of_stopwords=10, title_or_post="both", token_or_type="type")
+do_tfidf_max_occurences(my_forum)
+do_tfidf_tokens_in_doc(my_forum)
+# do_stats(my_forum, rare_threshold=2)
+# tfidf_two_step("l", "2015-14", number_of_stopwords=200, content="both")
 # or this:
-#KE.only_tfidf()
-#KE.only_rake()
-#KE.only_statistics()
+# KE.only_tfidf()
+# KE.only_rake()
+# KE.only_statistics()
 
