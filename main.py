@@ -31,6 +31,7 @@ def prepare_forum(forum, week, number_of_stopwords, title_or_post):
         self.week_data, list w posts and/or headings from the week in question as items
         self.corpus_data, dictionary with week as key, and list with posts and/or headings as value
     """
+    print("Creating a Forum Object")
     return prepare_extraction.Preparation(forum, week, number_of_stopwords, title_or_post)
 
 
@@ -40,6 +41,7 @@ def do_tfidf_max_occurences(my_forum):
     :param my_forum: forum object prepared for KE
     :return: TF*IDF-value stored in my_tfidf.sorted_tfidf, ex [("word1", 0.789), ("word2", 0.6514), ("word3", 0.2), ...]
     """
+    print("Counting TF*IDF with token count divided by maximum occurences")
     my_tfidf = tfidf.Tfidf(my_forum)
     my_tfidf.count_tfidf(tf_equation="maximum occurencies")
     print("Sorted TFIDF(tf equation = max occurences)", my_tfidf.sorted_tfidf)
@@ -51,6 +53,7 @@ def do_tfidf_tokens_in_doc(my_forum):
     :param my_forum: forum object prepared for KE
     :return: TF*IDF-value stored in my_tfidf.sorted_tfidf, ex [("word1", 0.078), ("word2", 0.065), ("word3", 0.02), ...]
     """
+    print("Counting TF*IDF with token count divided by total number of tokens in document")
     my_tfidf = tfidf.Tfidf(my_forum)
     my_tfidf.count_tfidf(tf_equation="number tokens in doc")
     print("Sorted TFIDF(tf equation = tokens in doc)", my_tfidf.sorted_tfidf)
@@ -67,7 +70,7 @@ def do_stats(my_forum, rare_threshold):
 # either this:
 #prepare_files()
 #tfidf_posts_as_doc("t", "2015-14", number_of_stopwords=200, content="both")
-my_forum = prepare_forum("t", "2015-14", number_of_stopwords=10, title_or_post="both")
+my_forum = prepare_forum("l", "2015-14", number_of_stopwords=10, title_or_post="both")
 do_tfidf_max_occurences(my_forum)
 do_tfidf_tokens_in_doc(my_forum)
 do_stats(my_forum, rare_threshold=2)

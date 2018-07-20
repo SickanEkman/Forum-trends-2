@@ -81,5 +81,9 @@ class Preparation:
             print("Can't find file '%s'" % self.path_to_csv_file)
 
     def count_number_tokens_in_week(self):
+        """
+        Count total number of tokens in Week of Interest
+        :return: store in self.number_tokens_in_week
+        """
         for item in self.week_data:
             self.number_tokens_in_week += len(item.split(" "))
