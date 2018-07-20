@@ -8,7 +8,7 @@ class Preparation:
     def __init__(self,
                  forum_nick,
                  week_of_interest,
-                 number_of_stopwords=50,
+                 number_of_stopwords=20,
                  title_or_post="both",
                  token_or_type="token",):
         """
@@ -104,30 +104,3 @@ class Preparation:
         """
         for item in self.week_data:
             self.number_tokens_in_week += len(item.split(" "))
-
-'''    def query_database(self, header):
-        """
-        Collect posts from csv files and saves them to forum object
-        :param header: Either 'title_lemmatized' or 'text_lemmatized'
-        :return: add posts to:
-            self.week_data (list w all text from the week in question)
-            self.corpus_data (dict w k=week, v=list w texts) NOT INCLUDING WEEK IN QUESTION
-        """
-        try:
-            with open(self.path_to_csv_file, "r") as fin:
-                data = csv.DictReader(fin, delimiter="\t")
-                for row in data:
-                    if row["week"] == self.week:
-                        self.week_data.append(row[header])
-                    else:
-                        self.corpus_data[row["week"]].append(row[header])
-            if len(self.week_data) == 0:
-                print("No posts for the specified week in file '%s'\nProgram closed" % self.path_to_csv_file)
-                sys.exit()
-            fin.close()
-            return self.week_data, self.corpus_data
-        except FileNotFoundError:
-            print("Can't find file '%s'" % self.path_to_csv_file)
-'''
-
-

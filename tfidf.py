@@ -38,7 +38,7 @@ class Tfidf:
                 self.list_of_week_words.append(word)
         return self.list_of_week_words
 
-    def count_tf(self, tf_equation="maximum occurencies"):
+    def count_tf(self):
         """
         Count Term Frequency for types in doc (Week Of Interest)
         TF equation: (frequency of type)/(maximum frequency of any type)
@@ -48,11 +48,7 @@ class Tfidf:
         list_with_words = self.list_of_week_words
         counted = collections.Counter(list_with_words)
         max_occurencies = max(counted.values())
-        number_tokens = sum(counted.values())
-        if tf_equation == "maximum occurencies":
-            self.tf = {k: (v / max_occurencies) for (k, v) in counted.items()}
-        elif tf_equation == "number tokens in doc":
-            self.tf = {k: (v / number_tokens) for (k, v) in counted.items()}
+        self.tf = {k: (v / max_occurencies) for (k, v) in counted.items()}
 
     def count_idf(self):
         """
@@ -71,13 +67,13 @@ class Tfidf:
             self.idf[word] = math.log2(num_docs/doc_occurences)
         return self.idf
 
-    def count_tfidf(self, tf_equation):
+    def count_tfidf(self):
         """
         Multiply every type's tf with it's idf and get tf*idf. Create tuples (type, tfidf-value).
         :return: append tuples to self.sorted_tfidf, sorted after size of tfidf-value in falling order.
         """
         if len(self.tf) == 0:
-            self.count_tf(tf_equation)
+            self.count_tf()
         if len(self.idf) == 0:
             self.count_idf()
         tfidf = {}
