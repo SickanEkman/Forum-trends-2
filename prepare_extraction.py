@@ -5,12 +5,12 @@ import sys
 
 
 class Preparation:
-    def __init__(self, forum_nick, week_of_interest, number_of_stopwords=100, title_or_post="both"):
+    def __init__(self, forum_nick, week_of_interest, number_of_stopwords=50, title_or_post="both"):
         """
         initialize the preparation object, give it attributes
         :param forum_nick: a letter ID:ing the forum, ex "k"
         :param week_of_interest: yyyy-ww
-        :param number_of_stopwords: defults to 100
+        :param number_of_stopwords: defults to 50
         """
         self.forum_file_name = forum_nick + ".csv"  # string
         self.path_to_csv_file = os.path.join("csv_files", self.forum_file_name)  # string
@@ -21,8 +21,8 @@ class Preparation:
 
         self.stopwords = self.create_stopwords(number_of_stopwords)  # set
         self.week_data = []
-        self.number_tokens_in_week = 0
         self.corpus_data = collections.defaultdict(list)
+        self.number_tokens_in_week = 0
         self.collect_data()
 
     def create_stopwords(self, number_of_stopwords):
@@ -48,11 +48,13 @@ class Preparation:
     def collect_data(self):
         """
         Call method to query database that collects text, either the titles or texts or both
+        Call method to count the total number of tokens in Week of Interest
         """
         if self.content_type == "title" or self.content_type == "both":
             self.query_database("title_lemmatized")
         if self.content_type == "post" or self.content_type == "both":
             self.query_database("text_lemmatized")
+        self.count_number_tokens_in_week()
 
     def query_database(self, header):
         """
@@ -74,9 +76,10 @@ class Preparation:
                 print("No posts for the specified week in file '%s'\nProgram closed" % self.path_to_csv_file)
                 sys.exit()
             fin.close()
-            for item in self.week_data:
-                self.number_tokens_in_week += len(item.split(" "))
-            print(self.number_tokens_in_week)
             return self.week_data, self.corpus_data
         except FileNotFoundError:
             print("Can't find file '%s'" % self.path_to_csv_file)
+
+    def count_number_tokens_in_week(self):
+        for item in self.week_data:
+            self.number_tokens_in_week += len(item.split(" "))
