@@ -1,0 +1,3 @@
+--- TF*IDF algorithm ---
+Tried option to count TF as (word count / number tokens in document) instead of (word count / max occurences).
+Removed said option because result (internal order of words in final list) was identical, but with smaller numbers.
