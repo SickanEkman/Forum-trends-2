@@ -37,7 +37,6 @@ def prepare_forum(forum, week, number_of_stopwords, title_or_post, token_or_type
         self.corpus_data, dictionary with week as key, and list with posts and/or headings as value
     """
     print("Creating a Forum Object")
-    print("Number of stopwords =", number_of_stopwords)
     return prepare_extraction.Preparation(forum,
                                           week,
                                           number_of_stopwords,
@@ -71,21 +70,38 @@ def do_stats(my_forum, rare_threshold):
 
 
 #prepare_files()
+forum = "l"
+week = "2015-45"
+stopwords = 10
 
-print("*** Basic version:")
-my_forum = prepare_forum("l", "2015-45", 10, "both", "token")
+
+print("\n*** Basic version, title only:")
+my_forum = prepare_forum(forum, week, stopwords, "title", "token")
+do_tfidf(my_forum)
+print("*** Basic version, post only:")
+my_forum = prepare_forum(forum, week, stopwords, "post", "token")
+do_tfidf(my_forum)
+print("*** Basic version, both title and post:")
+my_forum = prepare_forum(forum, week, stopwords, "both", "token")
 do_tfidf(my_forum)
 
-print("\n*** Token only counted once per title, post or comment (I.e. 'a a b b c' = 'a b c', 'x x y' = 'x y'):")
-my_forum = prepare_forum("l", "2015-45", 10, "both", "type")
+print("\n*** Token only counted once per title, post or comment, only title:")
+my_forum = prepare_forum(forum, week, stopwords, "title", "type")
+do_tfidf(my_forum)
+print("*** Token only counted once per title, post or comment, only post:")
+my_forum = prepare_forum(forum, week, stopwords, "post", "type")
+do_tfidf(my_forum)
+print("*** Token only counted once per title, post or comment, both title and post:")
+my_forum = prepare_forum(forum, week, stopwords, "both", "type")
 do_tfidf(my_forum)
 
 
+# todo: continue here!
 print("\n*** Word must appear in at least 4 titles/posts/comments to count. Every token counted (I.e. Basic version):")
-my_forum = prepare_forum("l", "2015-45", 10, "both", "token")
+my_forum = prepare_forum(forum, week, stopwords, "both", "token")
 
 print("\n*** Word must appear in at least 4 titles/posts/comments to count. Tokens counted once per title/post/c...:")
-my_forum = prepare_forum("l", "2015-45", 10, "both", "token")
+my_forum = prepare_forum(forum, week, stopwords, "both", "type")
 
 # do_stats(my_forum, rare_threshold=2)
 

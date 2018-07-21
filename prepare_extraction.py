@@ -53,7 +53,7 @@ class Preparation:
 
     def collect_data(self):
         """
-        Call method to query database that collects text, either the titles or texts or both
+        Call method to query database that collects text, either the titles or posts or both
         Call method to count the total number of tokens in Week of Interest
         """
         if self.content_type == "title" or self.content_type == "both":
@@ -77,6 +77,8 @@ class Preparation:
                     text_to_append = row[header]
                     if self.token_or_type == "type":
                         text_to_append = self.tokens_to_types(row[header])
+                    else:
+                        pass
                     if row["week"] == self.week:
                         self.week_data.append(text_to_append)
                     else:
