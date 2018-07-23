@@ -31,12 +31,12 @@ class Tfidf:
         Append all tokens from Week In Question (doc) to list
         :return: append to self.list_of_week_words
         """
-        self.list_of_week_words = []
+        list_of_week_words = []
         for text in self.forum.week_data:
             text_as_list = text.split(" ")
             for word in text_as_list:
-                self.list_of_week_words.append(word)
-        return self.list_of_week_words
+                list_of_week_words.append(word)
+        return list_of_week_words
 
     def count_tf(self):
         """

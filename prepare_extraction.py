@@ -10,7 +10,8 @@ class Preparation:
                  week_of_interest,
                  number_of_stopwords=20,
                  title_or_post="both",
-                 token_or_type="token",):
+                 token_or_type="token",
+                 ):
         """
         initialize the preparation object, give it attributes
         :param forum_nick: a letter ID:ing the forum, ex "k"
@@ -28,7 +29,7 @@ class Preparation:
         self.stopwords = self.create_stopwords(number_of_stopwords)  # set
         self.week_data = []
         self.corpus_data = collections.defaultdict(list)
-        self.number_tokens_in_week = 0
+        self.number_tokens_in_week = 0  # Remember! May count words from titles only or posts only, or both
         self.collect_data()
 
     def create_stopwords(self, number_of_stopwords):
@@ -60,7 +61,7 @@ class Preparation:
             self.query_database("title_lemmatized")
         if self.content_type == "post" or self.content_type == "both":
             self.query_database("text_lemmatized")
-        self.count_number_tokens_in_week()
+        #self.count_number_tokens_in_week()
 
     def query_database(self, header):
         """
@@ -75,6 +76,7 @@ class Preparation:
                 data = csv.DictReader(fin, delimiter="\t")
                 for row in data:
                     text_to_append = row[header]
+                    self.number_tokens_in_week += len(text_to_append.split(" "))
                     if self.token_or_type == "type":
                         text_to_append = self.tokens_to_types(row[header])
                     else:
@@ -99,10 +101,3 @@ class Preparation:
         text_w_types = " ".join(list_w_types)
         return text_w_types
 
-    def count_number_tokens_in_week(self):
-        """
-        Count total number of tokens in Week of Interest
-        :return: store in self.number_tokens_in_week
-        """
-        for item in self.week_data:
-            self.number_tokens_in_week += len(item.split(" "))

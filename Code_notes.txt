@@ -1,3 +1,6 @@
 --- TF*IDF algorithm ---
 Tried option to count TF as (word count / number tokens in document) instead of (word count / max occurences).
 Removed said option because result (internal order of words in final list) was identical, but with smaller numbers.
+
+"Korv" problem: Would be nice to change prepare_extraction file so it excludes words that only appears in one thread.
+But I don't have time - it's just to complicated to do right now.

@@ -8,111 +8,96 @@ class PureStatistics(object):
     def __init__(self, prepared_forum, threshold_for_tokens=2):
         self.rare_threshold = threshold_for_tokens
         self.forum = prepared_forum
-        self.doc_frequency_dict = {}
+        self.week_frequency_dict = {}
+        self.corpus_frequency_dict = {}
         self.corpus_mean = {}
         self.corpus_median = {}
         self.corpus_sd = {}
-        self.corpus_sd_mean = {}
-        self.corpus_sd_median = {}
+
+        self.get_week_word_frequencies()
+        self.get_corpus_word_frequencies()
+        self.get_corpus_stats()
+
 
     '''def __init__(self, document, list_with_files):
-        self.corpus_frequency_dict = self.get_doc_word_frequencies(document, rare_threshold=2)
-        self.get_corpus_word_frequencies(self.corpus_frequency_dict, list_with_files,)
-        self.get_corpus_stats(self.corpus_frequency_dict)
         self.compare_doc_and_corpus()'''
 
-    def get_doc_word_frequencies(self, document):
+    def get_week_word_frequencies(self):
         """
+        todo: This needs to be updated!
         Gets frequency ((occurences/number words)*1000) of all words in doc and saves to self.doc_frequency_dict
         :param document: name/path to conllu file
         :param rare_threshold: minimum number of occurences in file for word to be included in analysis
         :return: self.corpus_frequency_dict with k:word-in-file, v:[] (to be modified later)
         """
-        word_count = 0
         frequency_d = defaultdict(int)
-
-        with open(document, "r") as fin:
-            data = fin.read()
-            for sentence in parse(data):
-                for word in sentence:
-                    word_count += 1
-                    if word["upostag"] != "PUNCT":
-                        lemma = word["lemma"].lower()
-
-                        frequency_d[lemma] += 1
-        fin.close()
+        for text in self.forum.week_data:
+            text_as_list = text.split(" ")
+            for lemma in text_as_list:
+                frequency_d[lemma] += 1
         for k, v in frequency_d.items():
             if v >= self.rare_threshold:
                 # Multiply with 1000 to avoid small numbers:
-                self.doc_frequency_dict[k] = (v / word_count) * 1000
+                self.week_frequency_dict[k] = (v / self.forum.number_tokens_in_week) * 1000
             else:
                 pass
-                #self.doc_frequency_dict[k] = 0
-        self.corpus_frequency_dict = dict.fromkeys([k for k, v in self.doc_frequency_dict.items()], [])
-        return self.corpus_frequency_dict
 
-    def get_corpus_word_frequencies(self, words_in_corpus, files_in_corpus, ):
+    def get_corpus_word_frequencies(self):
         """
+        todo: This needs to be updated!
         Gets frequency in each file, for all words in doc above threshold
         :param words_in_corpus: dict with k:word-in-file, v:[]
         :param files_in_corpus: list of file names/paths
         :return: dict with k:word, v:[(frequency in doc x), (frequency in doc y), ...]
         """
-        for file_name in files_in_corpus:
+        self.corpus_frequency_dict = dict.fromkeys([k for k, v in self.week_frequency_dict.items()], [])
+        for week, list_w_texts in self.forum.corpus_data.items():
             word_count = 0
-            d_corpus_freq = defaultdict(int)
-            with open(file_name, "r") as fin:
-                data = fin.read()
-                for sentence in parse(data):
-                    for word in sentence:
-                        word_count += 1
-                        lemma = word["lemma"].lower()
-                        if lemma in words_in_corpus:
-                            d_corpus_freq[lemma] += 1
-            for k, v in words_in_corpus.items():
-                if k in d_corpus_freq:
-                    words_in_corpus[k] = words_in_corpus[k] + [(d_corpus_freq[k] / word_count) * 1000]
-#                    words_in_corpus[k] = words_in_corpus[k] + [math.log10(d_corpus_freq[k] / word_count)]
+            dict_count_occurences = defaultdict(int)
+            for text in list_w_texts:
+                list_w_words = text.split(" ")
+                for word in list_w_words:
+                    word_count += 1
+                    if word in self.corpus_frequency_dict:  # Otherwise - why bother?
+                        dict_count_occurences[word] += 1
+            for k, v in self.corpus_frequency_dict.items():
+                if k in dict_count_occurences:
+                    self.corpus_frequency_dict[k] = \
+                        self.corpus_frequency_dict[k] + [(dict_count_occurences[k] / word_count) * 1000]
                 else:
-                    words_in_corpus[k] = words_in_corpus[k] + [0]
-            #print(words_in_corpus)
+                    self.corpus_frequency_dict[k] = \
+                        self.corpus_frequency_dict[k] + [0]
 
-    def get_corpus_stats(self, corpus_occurences):
+
+    def get_corpus_stats(self):
         """
         get mean, median and (population)standard deviation for all words
-        :param corpus_occurences: dict with k:word, v:[(frequency in doc x), (frequency in doc y), ...]
-        :return: modifies attributes dictionaries corpus_mean, corpus_median, corpus_sd
+        :return: modifies attributes dictionaries corpus_mean, corpus_median, corpus_sd, corpus_sd_median
         """
-        for k, v in corpus_occurences.items():
-            #import pdb; pdb.set_trace()
-            self.corpus_mean[k] = statistics.mean(v)
-            self.corpus_median[k] = statistics.median(v)
-            self.corpus_sd[k] = statistics.pstdev(v, 2) #, self.corpus_mean[k])  # pstdev = population standard deviation
-            self.corpus_sd_median[k] = statistics.pstdev(v, 7) #, self.corpus_median[k])  # pstdev = population standard deviation
-        print(self.corpus_mean)
-        print(self.corpus_sd_mean)
-        print(self.corpus_sd_median)
-        print(self.corpus_median)
-        # todo: use sd and median even though sd for median doesn't work!
+        for word, frequency in self.corpus_frequency_dict.items():
+            self.corpus_mean[word] = statistics.mean(frequency)
+            self.corpus_median[word] = statistics.median(frequency)
+            self.corpus_sd[word] = statistics.pstdev(frequency)  # pstdev = population standard deviation
 
-
-    def compare_doc_and_corpus(self, median=True):
+    def compare_doc_and_corpus(self, mean_or_median):
         """
-        prints the words with frequency > mean+sd*2
+        prints the words with frequency > (mean + sd * 2)
         :param median: default=False. Otherwise prints words with frequency > median+sd*2
         """
-        #print("SD and MEAN: ")
-        list_biggest_tfidf = []
-        for k, v in self.doc_frequency_dict.items():
-            #print("\t\t", k, v, "\n", "\t\t", self.corpus_mean[k], "&", self.corpus_sd[k])
-            if v > self.corpus_mean[k] + (self.corpus_sd[k] * 2):
-                # print("\t\t", k, v, "\n", "\t\t", self.corpus_mean[k], "&", self.corpus_sd[k])
-                list_biggest_tfidf.append((k, v))
-                #print("MEAN: ", k, v)  # todo:save this somehow
-            if median:
-                if v > self.corpus_median[k] + (self.corpus_sd[k] * 3):
-                    print("MEDIAN:", k, v)  # todo:save this somehow
-        print(list_biggest_tfidf)
+        list_big_deviations = []
+        for word, frequency in self.week_frequency_dict.items():
+            if mean_or_median == "mean":
+                # todo: instead or deciding on a cut off - save to dictionary with diff as value \
+                # and then create a sorted list as I did in TFIDF.
+                # So save all and then print in reverse order.
+
+                if frequency > self.corpus_mean[word] + (self.corpus_sd[word] * 3):
+                    list_big_deviations.append((word, frequency))
+                    print("MEAN: ", word, frequency)  # todo:save this somehow
+            elif mean_or_median == "median":
+                if frequency > self.corpus_median[word] + (self.corpus_sd[word] * 3):
+                    print("MEDIAN:", word, frequency)  # todo:save this somehow
+        print(list_big_deviations)
         #sorted_list = sorted(list_biggest_tfidf, key=lambda t: t[1], reverse=True)
         #for i in sorted_list:
         #    print(i)

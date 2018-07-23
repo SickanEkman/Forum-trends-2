@@ -13,7 +13,12 @@ def prepare_files():
     prepare_og_files_weeks.Stopwords()
 
 
-def prepare_forum(forum, week, number_of_stopwords, title_or_post, token_or_type):
+def prepare_forum(forum,
+                  week,
+                  number_of_stopwords,
+                  title_or_post,
+                  token_or_type,
+                  ):
     """
     Create an object containing all info needed for different KE methods stored in attributes
     :param forum: The forum nick, ex: "k" or "l"
@@ -41,7 +46,8 @@ def prepare_forum(forum, week, number_of_stopwords, title_or_post, token_or_type
                                           week,
                                           number_of_stopwords,
                                           title_or_post,
-                                          token_or_type,)
+                                          token_or_type,
+                                          )
 
 
 def do_tfidf(my_forum):
@@ -62,6 +68,7 @@ def do_tfidf(my_forum):
 
 
 def do_stats(my_forum, rare_threshold):
+    print("Counting stats...")
     my_stats_model = pure_stats.PureStatistics(my_forum, rare_threshold)
     #my_stats_model.count_stats()
 
@@ -73,11 +80,13 @@ def do_stats(my_forum, rare_threshold):
 forum = "l"
 week = "2015-45"
 stopwords = 10
-
+rare_threshold_for_stats = 2
 
 print("\n*** Basic version, title only:")
 my_forum = prepare_forum(forum, week, stopwords, "title", "token")
 do_tfidf(my_forum)
+# todo: continue here!
+#do_stats(my_forum, rare_threshold_for_stats)
 print("*** Basic version, post only:")
 my_forum = prepare_forum(forum, week, stopwords, "post", "token")
 do_tfidf(my_forum)
@@ -96,12 +105,5 @@ my_forum = prepare_forum(forum, week, stopwords, "both", "type")
 do_tfidf(my_forum)
 
 
-# todo: continue here!
-print("\n*** Word must appear in at least 4 titles/posts/comments to count. Every token counted (I.e. Basic version):")
-my_forum = prepare_forum(forum, week, stopwords, "both", "token")
 
-print("\n*** Word must appear in at least 4 titles/posts/comments to count. Tokens counted once per title/post/c...:")
-my_forum = prepare_forum(forum, week, stopwords, "both", "type")
-
-# do_stats(my_forum, rare_threshold=2)
 
