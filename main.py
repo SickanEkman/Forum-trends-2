@@ -67,43 +67,67 @@ def do_tfidf(my_forum):
     print("Keywords from TFIDF: ", list_of_keywords_tfidf)
 
 
-def do_stats(my_forum, rare_threshold):
+def do_stats(my_forum, mean_or_median, subtract_sd, rare_threshold):
     print("Counting stats...")
-    my_stats_model = pure_stats.PureStatistics(my_forum, rare_threshold)
-    #my_stats_model.count_stats()
+    my_stats_model = pure_stats.PureStatistics(my_forum, mean_or_median, subtract_sd, rare_threshold)
 
-    #Rake = Rake(KE)
-    #Stats = Stats(KE)
+    number_of_keywords = 20
+    list_of_keywords_stats = []
+    for t in my_stats_model.sorted_stats[:number_of_keywords]:
+        list_of_keywords_stats.append(t[0])
+    print("Keywords from stats, %s, subtract_SD=%s: " % (mean_or_median, subtract_sd), list_of_keywords_stats)
 
 
-#prepare_files()
-forum = "l"
-week = "2015-45"
+
+forum_nick = "l"
+week = "2015-52"
+
 stopwords = 10
+
 rare_threshold_for_stats = 2
 
+#prepare_files()
+
 print("\n*** Basic version, title only:")
-my_forum = prepare_forum(forum, week, stopwords, "title", "token")
+my_forum = prepare_forum(forum_nick, week, stopwords, "title", "token")
 do_tfidf(my_forum)
-# todo: continue here!
-#do_stats(my_forum, rare_threshold_for_stats)
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)
 print("*** Basic version, post only:")
-my_forum = prepare_forum(forum, week, stopwords, "post", "token")
+my_forum = prepare_forum(forum_nick, week, stopwords, "post", "token")
 do_tfidf(my_forum)
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)
 print("*** Basic version, both title and post:")
-my_forum = prepare_forum(forum, week, stopwords, "both", "token")
+my_forum = prepare_forum(forum_nick, week, stopwords, "both", "token")
 do_tfidf(my_forum)
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)
 
 print("\n*** Token only counted once per title, post or comment, only title:")
-my_forum = prepare_forum(forum, week, stopwords, "title", "type")
+my_forum = prepare_forum(forum_nick, week, stopwords, "title", "type")
 do_tfidf(my_forum)
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)
 print("*** Token only counted once per title, post or comment, only post:")
-my_forum = prepare_forum(forum, week, stopwords, "post", "type")
+my_forum = prepare_forum(forum_nick, week, stopwords, "post", "type")
 do_tfidf(my_forum)
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)
 print("*** Token only counted once per title, post or comment, both title and post:")
-my_forum = prepare_forum(forum, week, stopwords, "both", "type")
+my_forum = prepare_forum(forum_nick, week, stopwords, "both", "type")
 do_tfidf(my_forum)
-
-
-
-
+do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+do_stats(my_forum, "median", False, rare_threshold_for_stats)
+do_stats(my_forum, "median", True, rare_threshold_for_stats)

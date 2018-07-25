@@ -42,7 +42,6 @@ class Tfidf:
         """
         Count Term Frequency for types in doc (Week Of Interest)
         TF equation: (frequency of type)/(maximum frequency of any type)
-        :param tf_equation: word count divided either with "maximum occurencies" (default) or "number tokens in doc"
         :return: adds to self.tf where k=type and v=TF
         """
         list_with_words = self.list_of_week_words
