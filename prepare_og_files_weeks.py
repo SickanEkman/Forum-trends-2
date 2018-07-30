@@ -14,6 +14,7 @@ class PrepareOriginalFiles:
     def __init__(self):
         self.dir_with_og_files = "original_files/"
         for forum in original_filenames.forums:
+            self.counter = 0
             self.prepare_file(forum)
 
     def prepare_file(self, forum):
@@ -22,6 +23,7 @@ class PrepareOriginalFiles:
         :param forum: path (string) to specific forum file in json format
         :return: calls function that store information to csv files
         """
+        print("Preparing forum", forum)
         udpipe_model = self.identify_language(forum)
         path_to_og_file = os.path.join(self.dir_with_og_files, forum)
         forum_nick = forum[6]  # saves first letter in forum name
@@ -55,6 +57,8 @@ class PrepareOriginalFiles:
         with open(og_file, "r") as fin:
             og_forum = json.load(fin)
         for dialogs in og_forum["dialogs"]:
+            self.counter += 1
+            print(self.counter)
             dialog_title = self.extract_text(dialogs, "title") + "."
             dialog_text = self.extract_text(dialogs, "content_text")
             dialog_date = self.extract_date(dialogs)
@@ -71,18 +75,32 @@ class PrepareOriginalFiles:
     def extract_text(self, text_field, part_to_extract):
         """
         Make text more readable
-        (Remove words not including letters/numbers/underscore, new line char and all double white spaces)
         :param text_field: dialog or comment from the forum
         :param part_to_extract: may be either "title" or "content_text"
         :return: same text, without new lines and double spaces
         """
         og_text = text_field[part_to_extract]
-        og_text_list = og_text.split(" ")
-        og_text_list = [i for i in og_text_list if re.match(r'^\w+\W*$', i)]
-        og_text = " ".join(og_text_list)
         text_no_new_line = og_text.replace("\n", " ")
-        the_text = text_no_new_line.replace("  ", " ")
-        return the_text
+        text_no_double_quotation = text_no_new_line.replace('"', " ")
+        text_no_single_quotation = text_no_double_quotation.replace("'", " ")
+        text_no_open_parentheses = text_no_single_quotation.replace("(", " ")
+        text_no_closing_parentheses = text_no_open_parentheses.replace(")", " ")
+        text_no_double_spaces = text_no_closing_parentheses.replace("  ", " ")
+        og_text_list = text_no_double_spaces.split(" ")
+        og_regex_text_list = []
+        for i in og_text_list:
+            # not sure about this regex, do I miss something _important_?
+            if re.match(r'^(\w+[-/:]?\w*)([.,!?:;]*)?$', i):
+                og_regex_text_list.append(i)
+            elif re.match(r'^(\w+-\w*)*$', i):  # this allows words with two or more hyphens, ex "tycka-till-knapp"
+                og_regex_text_list.append(i)
+            elif re.match(r'^(\w+/\w*)*$', i):  # this allows words with two or more hyphens, ex "ett/två/tre"
+                og_regex_text_list.append(i)
+            else:
+                pass
+        og_new_text = " ".join(og_regex_text_list)
+        final_text = og_new_text.replace("  ", " ")
+        return final_text
 
     def extract_date(self, text_field):
         """
@@ -175,6 +193,7 @@ class Stopwords:
         for dirpath, dirname, filenames in os.walk("csv_files"):
             for f in filenames:
                 forum_nick = f[0]
+                print("Creating stopwords for", forum_nick)
                 file_path = os.path.join(dirpath, f)
                 list_all_words = self.collect_words(file_path)
                 frequencies = self.count_frequencies(list_all_words)
