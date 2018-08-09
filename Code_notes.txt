@@ -4,3 +4,8 @@ Removed said option because result (internal order of words in final list) was i
 
 "Korv" problem: Would be nice to change prepare_extraction file so it excludes words that only appears in one thread.
 But I don't have time - it's just to complicated to do right now.
+
+Stopwords not necessary anymore since no RAKE. Will remove all stopword stuff at some point.
+
+Prepare_original_files issue: Can't figure out what the best regexps are.
+Now with r'^(\w+[-/:]?\w*)([.,!?:;]*)?$' I'll exclude "25%" for example. Ok for L-forum, but how about A-forum?

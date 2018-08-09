@@ -63,7 +63,7 @@ def do_tfidf(my_forum):
     number_of_keywords = 20
     list_of_keywords_tfidf = []
     for t in my_tfidf.sorted_tfidf[:number_of_keywords]:
-        list_of_keywords_tfidf.append(t[0])
+        list_of_keywords_tfidf.append((t[0], t[1]))
     print("Keywords from TFIDF: ", list_of_keywords_tfidf)
 
 
@@ -74,7 +74,7 @@ def do_stats(my_forum, mean_or_median, subtract_sd, rare_threshold):
     number_of_keywords = 20
     list_of_keywords_stats = []
     for t in my_stats_model.sorted_stats[:number_of_keywords]:
-        list_of_keywords_stats.append(t[0])
+        list_of_keywords_stats.append((t[0], t[1]))
     print("Keywords from stats, %s, subtract_SD=%s: " % (mean_or_median, subtract_sd), list_of_keywords_stats)
 
 
@@ -87,6 +87,7 @@ stopwords = 10
 rare_threshold_for_stats = 2
 
 #prepare_files()
+
 
 print("\n*** Basic version, title only:")
 my_forum = prepare_forum(forum_nick, week, stopwords, "title", "token")
@@ -131,3 +132,4 @@ do_stats(my_forum, "mean", False, rare_threshold_for_stats)
 do_stats(my_forum, "mean", True, rare_threshold_for_stats)
 do_stats(my_forum, "median", False, rare_threshold_for_stats)
 do_stats(my_forum, "median", True, rare_threshold_for_stats)
+
