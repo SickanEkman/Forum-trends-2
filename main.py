@@ -4,6 +4,10 @@ import tfidf
 import pure_stats
 
 
+forum_nick = "l"
+week = "2015-25"
+
+
 def prepare_files():
     """
     Extract relevant info from all json-files and store to csv-files. Create stopword-txt for each forum.
@@ -64,7 +68,7 @@ def do_tfidf(my_forum):
     list_of_keywords_tfidf = []
     for t in my_tfidf.sorted_tfidf[:number_of_keywords]:
         list_of_keywords_tfidf.append((t[0], t[1]))
-    print("Keywords from TFIDF: ", list_of_keywords_tfidf)
+    return list_of_keywords_tfidf
 
 
 def do_stats(my_forum, mean_or_median, subtract_sd, rare_threshold):
@@ -75,12 +79,21 @@ def do_stats(my_forum, mean_or_median, subtract_sd, rare_threshold):
     list_of_keywords_stats = []
     for t in my_stats_model.sorted_stats[:number_of_keywords]:
         list_of_keywords_stats.append((t[0], t[1]))
-    print("Keywords from stats, %s, subtract_SD=%s: " % (mean_or_median, subtract_sd), list_of_keywords_stats)
+    return list_of_keywords_stats
 
+def write_results_to_file(list_of_keywords, method_specs):
+    full_path_to_file = "results/" + forum_nick + "_" + week + ".txt"
+    with open(full_path_to_file, "a") as fout:
+        fout.write("\n\n" + method_specs + "\n")
+        for i in list_of_keywords:
+            fout.write(i[0]+"\t")
+    fout.close()
 
-
-forum_nick = "l"
-week = "2015-52"
+def write_method_version_to_file(info):
+    full_path_to_file = "results/" + forum_nick + "_" + week + ".txt"
+    with open(full_path_to_file, "a") as fout:
+        fout.write("\n\n" + info)
+    fout.close()
 
 stopwords = 10
 
@@ -88,48 +101,87 @@ rare_threshold_for_stats = 2
 
 #prepare_files()
 
-
-print("\n*** Basic version, title only:")
+info = "\n*** Basic version, title only:"
+write_method_version_to_file(info)
 my_forum = prepare_forum(forum_nick, week, stopwords, "title", "token")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
-print("*** Basic version, post only:")
-my_forum = prepare_forum(forum_nick, week, stopwords, "post", "token")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
-print("*** Basic version, both title and post:")
-my_forum = prepare_forum(forum_nick, week, stopwords, "both", "token")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
 
-print("\n*** Token only counted once per title, post or comment, only title:")
+info = "*** Basic version, post only:"
+write_method_version_to_file(info)
+my_forum = prepare_forum(forum_nick, week, stopwords, "post", "token")
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
+
+info = "*** Basic version, both title and post:"
+write_method_version_to_file(info)
+my_forum = prepare_forum(forum_nick, week, stopwords, "both", "token")
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
+
+info = "*** Token only counted once per title, post or comment, only title:"
+write_method_version_to_file(info)
 my_forum = prepare_forum(forum_nick, week, stopwords, "title", "type")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
-print("*** Token only counted once per title, post or comment, only post:")
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
+
+info = "*** Token only counted once per title, post or comment, only post:"
+write_method_version_to_file(info)
 my_forum = prepare_forum(forum_nick, week, stopwords, "post", "type")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
-print("*** Token only counted once per title, post or comment, both title and post:")
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
+
+info = "*** Token only counted once per title, post or comment, both title and post:"
+write_method_version_to_file(info)
 my_forum = prepare_forum(forum_nick, week, stopwords, "both", "type")
-do_tfidf(my_forum)
-do_stats(my_forum, "mean", False, rare_threshold_for_stats)
-do_stats(my_forum, "mean", True, rare_threshold_for_stats)
-do_stats(my_forum, "median", False, rare_threshold_for_stats)
-do_stats(my_forum, "median", True, rare_threshold_for_stats)
+my_list = do_tfidf(my_forum)
+write_results_to_file(my_list, "tfidf:")
+my_list = do_stats(my_forum, "mean", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, NOT substracting SD")
+my_list = do_stats(my_forum, "mean", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with mean, substracting SD")
+my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, NOT substracting SD")
+my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
+write_results_to_file(my_list, "Stats with median, substracting SD")
 
