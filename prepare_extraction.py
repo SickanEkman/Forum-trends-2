@@ -76,13 +76,14 @@ class Preparation:
                 data = csv.DictReader(fin, delimiter="\t")
                 for row in data:
                     text_to_append = row[header]
-                    self.number_tokens_in_week += len(text_to_append.split(" "))
+                    #self.number_tokens_in_week += len(text_to_append.split(" "))
                     if self.token_or_type == "type":
                         text_to_append = self.tokens_to_types(row[header])
                     else:
                         pass
                     if row["week"] == self.week:
                         self.week_data.append(text_to_append)
+                        self.number_tokens_in_week += len(text_to_append.split(" "))
                     else:
                         self.corpus_data[row["week"]].append(text_to_append)
             if len(self.week_data) == 0:

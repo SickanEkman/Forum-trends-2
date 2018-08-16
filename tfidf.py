@@ -56,8 +56,8 @@ class Tfidf:
         :return: adds to self.idf where k=type and v=IDF
         """
         num_docs = len(self.corpus_dict) + 1
-        # + 1 because I start my doc_occurences with 1 insted of 0 and if I
-        # divide a doc_occurences with a bigger value the log of the quotient would be negative. Not good?
+        # + 1 because I start my doc_occurences with 1 instead of 0, and if I
+        # divide a doc_occurences with a bigger value the log of the quotient would be negative. Not good, right?
         for word, frequency in self.tf.items():
             doc_occurences = 1  # to avoid division by zero issues
             for week, word_set in self.corpus_dict.items():

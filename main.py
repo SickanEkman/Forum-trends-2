@@ -5,7 +5,7 @@ import pure_stats
 
 
 forum_nick = "l"
-week = "2015-25"
+week = "2015-51"
 
 
 def prepare_files():
@@ -99,8 +99,24 @@ stopwords = 10
 
 rare_threshold_for_stats = 2
 
-#prepare_files()
 
+def look_at_forum_stats():
+    for i in range(1, 54):
+        week_no = ("%02d" % i)
+        w = "2015-" + week_no
+        my_forum = prepare_forum(forum_nick, w, stopwords, "post", "type")
+        print("number types in \t%s\t" % w, my_forum.number_tokens_in_week)
+    #w = "2015-07"
+    #my_forum = prepare_forum(forum_nick, w, stopwords, "post", "type")
+    #print(my_forum.week_data)
+
+
+look_at_forum_stats()
+
+
+
+#prepare_files()
+"""
 info = "\n*** Basic version, title only:"
 write_method_version_to_file(info)
 my_forum = prepare_forum(forum_nick, week, stopwords, "title", "token")
@@ -184,4 +200,4 @@ my_list = do_stats(my_forum, "median", False, rare_threshold_for_stats)
 write_results_to_file(my_list, "Stats with median, NOT substracting SD")
 my_list = do_stats(my_forum, "median", True, rare_threshold_for_stats)
 write_results_to_file(my_list, "Stats with median, substracting SD")
-
+"""
